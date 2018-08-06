@@ -9,6 +9,7 @@ const {
 	GraphQLInt,
 	GraphQLList,
 	GraphQLSchema,
+	GraphQLNonNull,
 	GraphQLID // for automatic conversion of int / string queries
 } = graphql;
 
@@ -79,8 +80,8 @@ const Mutation = new GraphQLObjectType({
 		addAuthor: {
 			type: AuthorType,
 			args: {
-				age: { type: GraphQLInt },
-				name: { type: GraphQLString }
+				age: { type: new GraphQLNonNull(GraphQLInt) },
+				name: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			resolve: (parent, args) => {
 				// using mongoose's author model to instantiate an author
@@ -95,8 +96,8 @@ const Mutation = new GraphQLObjectType({
 		addBook: {
 			type: BookType,
 			args: {
-				authorId: { type: GraphQLID },
-				title: { type: GraphQLString }
+				authorId: { type: new GraphQLNonNull(GraphQLID) },
+				title: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			resolve: (parent, args) => {
 				let book = new Book({
