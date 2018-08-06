@@ -1,15 +1,27 @@
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
 const { buildSchema } = require('graphql');
+const mongoose = require('mongoose');
 
 // imports our schema
 const schema = require('./schemas/schema');
 
 let app = express();
 
+mongoose.connect(
+	`mongodb://${process.env.MLAB_USER}:${process.env.MLAB_PASSWORD}@ds113442.mlab.com:13442/gql-tutorial`,
+	{ useNewUrlParser: true }
+)
+.then()
+.catch( (error) => console.error('database error: ', error) )
+
+mongoose.connection.once('open', () => {
+	console.log('connected to the mlab database');
+})
+
 // use the graphql endpoint for all graphql queries
 app.use('/graphql', graphqlHTTP({
-  schema,
+  schema, // different from the mongoDB schema, this is the graph that connects it
   graphiql: true
 }));
 
