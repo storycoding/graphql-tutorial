@@ -12,7 +12,12 @@ mongoose.connect(
 	`mongodb://${process.env.MLAB_USER}:${process.env.MLAB_PASSWORD}@ds113442.mlab.com:13442/gql-tutorial`,
 	{ useNewUrlParser: true }
 )
-.then()
+.then( (connection) => {
+	const host = connection.connections[0].host;
+	const port = connection.connections[0].port;
+	const user = connection.connections[0].user;
+	console.log(`connected to MongoBD host ${host} on port ${port} as ${user}`)
+})
 .catch( (error) => console.error('database error: ', error) )
 
 mongoose.connection.once('open', () => {
