@@ -28,7 +28,8 @@ const BookType = new GraphQLObjectType({
 
 			// this is where the graph in graphQL works its magic
 			// one-one relationship
-			resolve: (parent, args) => _.find( authors, { id: parent.authorId } )
+			resolve: (parent) => _.find( authors, { id: parent.authorId } )
+			// resolve doesn't need args in this case
 		}
 	})
 	// fields is only executed after the whole code is run, so the dual dependecy injection works
@@ -46,7 +47,7 @@ const AuthorType = new GraphQLObjectType({
 			// one-many relationship : the GraphQLList
 			type: new GraphQLList(BookType),
 			// use _.filter instead, to return all matching entries from list
-			resolve: (parent, args) => _.filter( books, { authorId: parent.id } )
+			resolve: (parent) => _.filter( books, { authorId: parent.id } )
 		}
 	})
 
@@ -69,6 +70,15 @@ const RootQuery = new GraphQLObjectType({
 			type: AuthorType,
 			args: { id: { type: GraphQLID} },
 			resolve: (parent, args) => _.find( authors, { id: args.id } )
+		},
+		books: {
+			type: new GraphQLList(BookType),
+			resolve: () => books
+			// resolve doesn't need any args to specify results
+		},
+		authors: {
+			type: new GraphQLList(AuthorType),
+			resolve: () => authors
 		}
 	}
 
