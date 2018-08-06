@@ -1,9 +1,4 @@
 const graphql = require('graphql');
-const _ = require('lodash');
-
-// dummy data
-const books = require('../dummyData/books');
-const authors = require('../dummyData/authors');
 
 const Book = require('../models/book');
 const Author = require('../models/author');
@@ -21,84 +16,100 @@ const BookType = new GraphQLObjectType({
 
 	name: 'Book',
 
-	// fields needs to be wrapped in a function
-	// because it tries to source a type (object) that is not yet defined
+	// fields needs to be wrapped in a function (avoids undefined obj props)
 	fields: () => ({
 		id: { type: GraphQLID },
 		title: { type: GraphQLString },
 		author: {
 			type: AuthorType,
-
-			// this is where the graph in graphQL works its magic
-			// one-one relationship
-			resolve: (parent) => _.find(
-				// authors, { id: parent.authorId }
-				)
-			// resolve doesn't need args in this case
+			// one-one relationship ( findById )
+			resolve: (parent, args) => Author.findById(parent.authorId)
 		}
 	})
-	// fields is only executed after the whole code is run, so the dual dependecy injection works
-
 });
 
 const AuthorType = new GraphQLObjectType({
 
 	name: 'Author',
+
 	fields: () => ({
 		id: { type: GraphQLID },
 		name: { type: GraphQLString },
 		age: { type: GraphQLInt },
 		books: {
-			// one-many relationship : the GraphQLList
 			type: new GraphQLList(BookType),
-			// use _.filter instead, to return all matching entries from list
-			resolve: (parent) => _.filter(
-				// books, { authorId: parent.id }
-				)
+			// one-many relationship ( find )
+			resolve: (parent) => Book.find({ authorId: parent.id })
 		}
 	})
-
-})
+});
 
 const RootQuery = new GraphQLObjectType({
 
 	name:'RootQueryType',
 	fields: {
-
-		// must match the name of the query
-		book: {
-			type: BookType,
+		// prop key must match the name of the query
+		author: {
+			type: AuthorType,
 			// args is what tells where in the graph to look for the entry
 			args: { id: { type: GraphQLID } },
 			// using lodash to filter by id
-			resolve: (parent, args) => _.find(
-				// books, { id: args.id }
-				)
+			resolve: (parent, args) => Author.findById(args.id)
 		},
-		author: {
-			type: AuthorType,
-			args: { id: { type: GraphQLID} },
-			resolve: (parent, args) => _.find(
-				// authors, { id: args.id }
-				)
-		},
-		books: {
-			type: new GraphQLList(BookType),
-			resolve: () => (
-				//books
-				)
-			// resolve doesn't need any args to specify results
+		book: {
+			type: BookType,
+			args: { id: { type: GraphQLID } },
+			resolve: (parent, args) => Book.findById(args.id)
 		},
 		authors: {
 			type: new GraphQLList(AuthorType),
-			resolve: () => (
-				// authors
-				)
+			resolve: () => Author.find({})
+			// resolve doesn't need any args to specify results
+		},
+		books: {
+			type: new GraphQLList(BookType),
+			resolve: () => Book.find({})
 		}
 	}
+});
 
-})
+const Mutation = new GraphQLObjectType({
+	name: 'Mutation',
+	fields: {
+		addAuthor: {
+			type: AuthorType,
+			args: {
+				age: { type: GraphQLInt },
+				name: { type: GraphQLString }
+			},
+			resolve: (parent, args) => {
+				// using mongoose's author model to instantiate an author
+				let author = new Author({
+					age: args.age,
+					name: args.name
+				});
+				// add return to get the saved entry
+				return author.save(); // saves the author to the db :o
+			}
+		},
+		addBook: {
+			type: BookType,
+			args: {
+				authorId: { type: GraphQLID },
+				title: { type: GraphQLString }
+			},
+			resolve: (parent, args) => {
+				let book = new Book({
+					authorId: args.authorId,
+					title: args.title
+				});
+				return book.save();
+			}
+		}
+	}
+});
 
 module.exports = new GraphQLSchema({
-	query: RootQuery
+	query: RootQuery,
+	mutation: Mutation
 })
