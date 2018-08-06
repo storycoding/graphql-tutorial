@@ -11,4 +11,4 @@ const authorSchema = new Schema({
 	age: Number
 });
 
-module.exports = Model('Author ', authorSchema);
+module.exports = Model('Author', authorSchema);
