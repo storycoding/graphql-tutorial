@@ -5,9 +5,6 @@ const _ = require('lodash');
 const books = require('../dummyData/books');
 const authors = require('../dummyData/authors');
 
-const Book = require('../models/book');
-const Author = require('../models/author');
-
 const { 
 	GraphQLObjectType,
 	GraphQLString,
@@ -31,9 +28,7 @@ const BookType = new GraphQLObjectType({
 
 			// this is where the graph in graphQL works its magic
 			// one-one relationship
-			resolve: (parent) => _.find(
-				// authors, { id: parent.authorId }
-				)
+			resolve: (parent) => _.find( authors, { id: parent.authorId } )
 			// resolve doesn't need args in this case
 		}
 	})
@@ -52,9 +47,7 @@ const AuthorType = new GraphQLObjectType({
 			// one-many relationship : the GraphQLList
 			type: new GraphQLList(BookType),
 			// use _.filter instead, to return all matching entries from list
-			resolve: (parent) => _.filter(
-				// books, { authorId: parent.id }
-				)
+			resolve: (parent) => _.filter( books, { authorId: parent.id } )
 		}
 	})
 
@@ -71,29 +64,21 @@ const RootQuery = new GraphQLObjectType({
 			// args is what tells where in the graph to look for the entry
 			args: { id: { type: GraphQLID } },
 			// using lodash to filter by id
-			resolve: (parent, args) => _.find(
-				// books, { id: args.id }
-				)
+			resolve: (parent, args) => _.find( books, { id: args.id } )
 		},
 		author: {
 			type: AuthorType,
 			args: { id: { type: GraphQLID} },
-			resolve: (parent, args) => _.find(
-				// authors, { id: args.id }
-				)
+			resolve: (parent, args) => _.find( authors, { id: args.id } )
 		},
 		books: {
 			type: new GraphQLList(BookType),
-			resolve: () => (
-				//books
-				)
+			resolve: () => books
 			// resolve doesn't need any args to specify results
 		},
 		authors: {
 			type: new GraphQLList(AuthorType),
-			resolve: () => (
-				// authors
-				)
+			resolve: () => authors
 		}
 	}
 
