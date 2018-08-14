@@ -4,7 +4,7 @@
   "description": "a playground for learning graphql",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,8 @@
     "graphql-tools": "^3.1.0",
     "lodash": "^4.17.10",
     "mongoose": "^5.2.6"
+  },
+  "devDependencies": {
+    "jest": "^23.5.0"
   }
 }
